@@ -3,25 +3,30 @@
 Summarize the supplied media file using OpenAI
 """
 
-import argparse
-import openai
 import sys
 import os
+import argparse
 import mimetypes
 import tempfile
-import pysrt
 import datetime
 import json
 
 from pathlib import Path
 from pydub import AudioSegment
 
+import pysrt
+import openai
+
+
 TWENTYFIVE_MB = 26214400
 TEMP_DIR = Path(tempfile.gettempdir())
 DEFAULT_SUMMARY_PROMPT = (
     "Create a cheatsheet out of the following transcript in less than 50 words: \n"
 )
-CONTINUE_SUMMARY_PROMPT = "Continue with the next part of the same transcript, use the same style as before: \n"
+CONTINUE_SUMMARY_PROMPT = (
+    "Continue with the next part of the same transcript,"
+    + "use the same style as before: \n"
+)
 SYSTEM_PROMPT = {
     "role": "system",
     "content": "You are a helpful assistant who summarizes with bullet points.",
@@ -117,14 +122,15 @@ def generate_summary(
     audio_size = audio.stat().st_size
     if audio_size > TWENTYFIVE_MB:
         print(
-            f"Audio file is too large {audio_size / 1000000}MB, must be less than 25MB, attempting to downsample"
+            f"Audio file is too large {audio_size / 1000000}MB"
+            + "must be less than 25MB, attempting to downsample"
         )
         audio = downsample_audio(audio, TWENTYFIVE_MB)
         audio_size = audio.stat().st_size
     print(f"Audio file size in MB: {audio_size / 1000000}")
 
     openai.api_key = api_key
-    print(f"Transcribing using OpenAI's Whisper AI")
+    print("Transcribing using OpenAI's Whisper AI")
     with open(audio, "rb") as f:
         transcript = openai.Audio.transcribe(
             "whisper-1",
@@ -194,7 +200,7 @@ def generate_summary(
         gpt_response = response.choices[0].message.content
         # Format timestamp in hh:mm:ss format
         chunk_timedelta = datetime.timedelta(milliseconds=chunk_timestamp)
-        chunk_timedelta_str = str(chunk_timedelta).split(".")[0]
+        chunk_timedelta_str = str(chunk_timedelta).split(".", maxsplit=1)[0]
         # If hours is only 1 digit, add a leading 0
         if len(chunk_timedelta_str.split(":")[0]) == 1:
             chunk_timedelta_str = "0" + chunk_timedelta_str
@@ -227,20 +233,20 @@ def format_output(cheatsheet: dict, output_format: str):
 
 
 def get_characters(messages: list):
-    return sum([len(message["content"]) for message in messages])
+    return sum(len(message["content"]) for message in messages)
 
 
 def get_max_tokens(model: str):
     if model == "gpt-4":
         return 7000
-    else:
-        return 3000
+
+    return 3000
 
 
 def get_audio(media: Path):
     print(f"Getting audio from {media}")
-    type = mimetypes.guess_type(media)[0]
-    if type == "audio":
+    file_type = mimetypes.guess_type(media)[0]
+    if file_type == "audio":
         print("Media is already audio, no need to convert")
         return media
 
@@ -268,7 +274,7 @@ def downsample_audio(audio: Path, max_size: int = TWENTYFIVE_MB):
 
     print("Unable to downsample audio file, it needs to be split into smaller chunks")
     print("Open a feature request on GitHub if you need this feature")
-    raise Exception("Unable to downsample audio file")
+    raise RuntimeError("Unable to downsample audio file")
 
 
 if __name__ == "__main__":
