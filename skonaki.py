@@ -123,7 +123,7 @@ def generate_summary(
     if audio_size > TWENTYFIVE_MB:
         print(
             f"Audio file is too large {audio_size / 1000000}MB"
-            + "must be less than 25MB, attempting to downsample"
+            + ". It must be less than 25MB, attempting to downsample"
         )
         audio = downsample_audio(audio, TWENTYFIVE_MB)
         audio_size = audio.stat().st_size
