@@ -146,5 +146,6 @@ dmypy.json
 *.ogg
 *.flac
 
-# Ignore text files
+# Ignore text files except requirements.txt
 *.txt
+!requirements.txt
