@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Summarize the supplied media file using OpenAI
+Create cheatsheets from videos using the power of OpenAI
 """
 
 import sys
