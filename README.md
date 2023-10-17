@@ -38,6 +38,13 @@ important information from the video.
 The cheatsheet generation is done by using the ChatCompletion API by OpenAI.
 It's been tested to work on Ubuntu with `ffmpeg` installed.
 
-To use `skonaki` you need to install its dependencies first by `pip install --user -r requirements.txt`.<br>
-Next, you need to get an [OpenAI API key](https://platform.openai.com/account/api-keys).
-This is a paid service and it's used for the transcription and the cheatsheet generation.
+### Installation
+
+* Dependencies
+  * To use `skonaki` you need to install its dependencies first by `pip install --user -r requirements.txt`.
+* OpenAI API key
+  * You need to get an [OpenAI API key](https://platform.openai.com/account/api-keys).
+  This is a paid service and it's used for the transcription and the cheatsheet generation.
+  * Set the `OPENAI_API_KEY` environment variable to your API key or pass it as an argument to `skonaki.py`.
+
+Run `skonaki.py --help` to see all available options.
