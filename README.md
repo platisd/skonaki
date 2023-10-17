@@ -48,3 +48,20 @@ It's been tested to work on Ubuntu with `ffmpeg` installed.
   * Set the `OPENAI_API_KEY` environment variable to your API key or pass it as an argument to `skonaki.py`.
 
 Run `skonaki.py --help` to see all available options.
+
+### Comparison with other tools
+
+Several tools help create notes, summaries, etc. out of videos.
+The main difference is that most of them are web services that only require you to
+provide a link to the video and they do the rest for you.
+I wanted to avoid handling video URLs since that's its own project and didn't want to bother.
+
+Here's my very "scientific" comparison of `skonaki` with other tools.
+I did not bother with those that required signing up or had a paywall:
+
+* [youtubesummarizer.com](https://youtubesummarizer.com/)
+  * Works pretty well, there are some ads and I like the executive summary part that they also provide. I'd say the quality of the results is similar to `skonaki`.
+* [summarize.tech](https://www.summarize.tech/)
+  * Wasn't very impressed with the results. It summarizes OKish but wouldn't be good enough for studying purposes.
+* [notegpt.io](https://notegpt.io/)
+  * Rather quick, I only tried their web version, while it also comes as a plugin. While the summary was on point, I found it too short to use for studying purposes. Great for summarizing though.
