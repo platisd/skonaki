@@ -11,6 +11,7 @@ import mimetypes
 import tempfile
 import pysrt
 import datetime
+import json
 
 from pathlib import Path
 from pydub import AudioSegment
@@ -65,9 +66,14 @@ def main():
     )
     parser.add_argument(
         "--output",
-        help="Output file (default: only stdout)",
+        help="Path to the output file (default: only stdout)",
         type=Path,
         default=None,
+    )
+    parser.add_argument(
+        "--output-format",
+        help="Output format, choose between: text (default), json",
+        default="text",
     )
     args = parser.parse_args()
 
@@ -79,7 +85,8 @@ def main():
         model=args.model,
         language=args.language,
         frequency=args.frequency,
-        output=args.output,
+        output_path=args.output,
+        output_format=args.output_format,
     )
     print(exit_message)
     return exit_code
@@ -93,7 +100,8 @@ def generate_summary(
     model: str = "gpt-3.5-turbo",
     language: str = "en",
     frequency: int = 60,
-    output: Path = None,
+    output_path: Path = None,
+    output_format: str = "text",
 ):
     if not media.is_file():
         exit_message = f"Media file {media} does not exist"
@@ -141,7 +149,7 @@ def generate_summary(
         chunks.append((chunk, chunk_beginning))
 
     messages = [SYSTEM_PROMPT]
-    cheatsheet = ""
+    cheatsheet = {}
     current_chunk = 1
     for subtitle_chunk, chunk_timestamp in chunks:
         # Convert the chunk to text
@@ -191,7 +199,7 @@ def generate_summary(
         if len(chunk_timedelta_str.split(":")[0]) == 1:
             chunk_timedelta_str = "0" + chunk_timedelta_str
 
-        cheatsheet += f"{chunk_timedelta_str}\n{gpt_response}\n"
+        cheatsheet[chunk_timedelta_str] = gpt_response
         messages.append(
             {
                 "role": "assistant",
@@ -199,12 +207,23 @@ def generate_summary(
             },
         )
 
-    if output:
-        output.write_text(cheatsheet)
-        print(f"Saved cheatsheet to {output.resolve()}")
+    formatted_output = format_output(cheatsheet, output_format)
 
-    exit_message = "\n\n\n" + cheatsheet
+    if output_path:
+        output_path.write_text(formatted_output)
+        print(f"Saved cheatsheet to {output_path.resolve()}")
+
+    exit_message = "\n\n\n" + formatted_output
     return (0, exit_message)
+
+
+def format_output(cheatsheet: dict, output_format: str):
+    if output_format == "json":
+        return json.dumps(cheatsheet, indent=4)
+    # Return as <timestamp>\n<summary> for each timestamp and summary
+    return "\n".join(
+        [f"{timestamp}\n{summary}" for timestamp, summary in cheatsheet.items()]
+    )
 
 
 def get_characters(messages: list):
