@@ -65,3 +65,10 @@ I did not bother with those that required signing up or had a paywall:
   * Wasn't very impressed with the results. It summarizes OKish but wouldn't be good enough for studying purposes.
 * [notegpt.io](https://notegpt.io/)
   * Rather quick, I only tried their web version, while it also comes as a plugin. While the summary was on point, I found it too short to use for studying purposes. Great for summarizing though.
+
+| Tool                  | Summaries | Timestamps | Customization | Notes                                                                                      |
+| --------------------- | --------- | ---------- | ------------- | ------------------------------------------------------------------------------------------ |
+| `skonaki`             | 🏆         | ✅          | ✅             | Can customize anything from the prompt used, to how often a "summary" is produced          |
+| youtubesummarizer.com | 🏆         | ❌          | 😒             | There's a sliding scale for how long the summary should be, but doesn't get too "detailed" |
+| summarize.tech        | 😒         | ✅          | ❌             | No customization, their summary is not very suitable for studying                          |
+| notegpt.io            | 😒         | ❌          | ❌             | The summary is pretty good, but not detailed enough for studying                           |
