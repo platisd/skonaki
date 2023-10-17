@@ -149,7 +149,7 @@ def generate_summary(
 
         # Count the number of characters in messages
         characters_per_token = 4
-        max_tokens = 3000
+        max_tokens = get_max_tokens(model)
         if get_characters(messages) > max_tokens * characters_per_token:
             # Keep only the first message (system prompt) and the last message (assistant response)
             print("Reached the max number of tokens, resetting messages")
@@ -209,6 +209,13 @@ def generate_summary(
 
 def get_characters(messages: list):
     return sum([len(message["content"]) for message in messages])
+
+
+def get_max_tokens(model: str):
+    if model == "gpt-4":
+        return 7000
+    else:
+        return 3000
 
 
 def get_audio(media: Path):
