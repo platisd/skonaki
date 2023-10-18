@@ -122,7 +122,7 @@ def generate_summary(
     audio_size = audio.stat().st_size
     if audio_size > TWENTYFIVE_MB:
         print(
-            f"Audio file is too large {audio_size / 1000000}MB"
+            f"Audio file is too large: {audio_size / 1000000}MB"
             + ". It must be less than 25MB, attempting to downsample"
         )
         audio = downsample_audio(audio, TWENTYFIVE_MB)
@@ -130,7 +130,7 @@ def generate_summary(
     print(f"Audio file size in MB: {audio_size / 1000000}")
 
     openai.api_key = api_key
-    print("Transcribing using OpenAI's Whisper AI")
+    print("Transcribing using OpenAI's Whisper")
     with open(audio, "rb") as f:
         transcript = openai.Audio.transcribe(
             "whisper-1",
