@@ -8,7 +8,7 @@ Study smarter, not harder: Create cheatsheets out of videos 🪄
 ## What is `skonaki`?
 
 `skonaki` is a tool that allows you to create cheatsheets out of videos.<br>
-It is a command line tool that takes a path to a video or audio file and produces
+It is a command line tool that takes a path (or a URL) to a video or audio file and produces
 a list of bullet points with the most important information from the video.
 The bullet points are accompanied by timestamps, in case you need to refer back
 to the video and check a specific part for yourself.<br>
@@ -36,7 +36,10 @@ Ultimately, what `skonaki` does is split audio from video, then transcribe it us
 the Whisper OpenAI API and finally use the transcription to create a cheatsheet with the most
 important information from the video.
 The cheatsheet generation is done by using the ChatCompletion API by OpenAI.
-It's been tested to work on Ubuntu with `ffmpeg` installed.
+It's been tested to work on Ubuntu with `ffmpeg` installed.<br>
+If a URL is provided, `skonaki` will download the video using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
+Currently, only publicly available media are supported. Create an issue if you need support for
+something more or download the video yourself and pass the path to `skonaki`.
 
 ### Installation
 

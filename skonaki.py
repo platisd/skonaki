@@ -13,6 +13,7 @@ import json
 
 from pathlib import Path
 from pydub import AudioSegment
+from yt_dlp import YoutubeDL
 
 import pysrt
 import openai
@@ -35,7 +36,7 @@ SYSTEM_PROMPT = {
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("media", help="Path to media file", type=Path)
+    parser.add_argument("media", help="Path or URL to media file", type=str)
     parser.add_argument(
         "--api-key",
         help="OpenAI API key (default: read from OPENAI_API_KEY environment variable)",
@@ -81,6 +82,35 @@ def main():
         default="text",
     )
     args = parser.parse_args()
+
+    if Path(args.media).is_file():
+        args.media = Path(args.media)
+    else:
+        audio_codec = "m4a"
+        audio_fname = Path("skonaki_audio_from_youtube." + audio_codec)
+        extracted_audio = TEMP_DIR / audio_fname
+        ydl_opts = {
+            "outtmpl": str(extracted_audio.with_suffix("")),
+            "overwrites": True,
+            "format": "m4a/bestaudio/best",
+            "postprocessors": [
+                {  # Extract audio using ffmpeg
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": audio_codec,
+                }
+            ],
+        }
+        with YoutubeDL(ydl_opts) as ydl:
+            ydl_code = ydl.download([args.media])
+            if ydl_code != 0:
+                print(
+                    "Unable to download media file from: "
+                    + args.media
+                    + " error: "
+                    + str(ydl_code)
+                )
+            print("Downloaded from: " + args.media + " to: " + str(extracted_audio))
+            args.media = extracted_audio
 
     exit_code, exit_message = generate_summary(
         media=args.media,
