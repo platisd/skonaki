@@ -85,10 +85,9 @@ def main():
         "--run-whisper-locally",
         help="Run the Whisper API locally (default: False)",
         required=False,
-        action="store_true"
+        action="store_true",
     )
     args = parser.parse_args()
-
 
     if Path(args.media).is_file():
         args.media = Path(args.media)
@@ -170,20 +169,33 @@ def generate_summary(
 
     if use_local_whisper:
         try:
-            import whisper
+            import whisper  # pylint: disable=import-outside-toplevel
         except ImportError:
-            error_message = "Error: Failed to import whisper. Please install the correct dependencies from requirements-local-whisper.txt"
-            return(1, error_message)
+            error_message = (
+                "Error: Failed to import whisper. "
+                + "Please install the correct dependencies from requirements-local-whisper.txt"
+            )
+            return (1, error_message)
 
         print("Transcribing using Whisper locally")
         local_whisper_model = whisper.load_model("base")
         loaded_audio = whisper.load_audio(audio)
-        result = whisper.transcribe(model=local_whisper_model, audio=loaded_audio, language=language, prompt=transcription_prompt) 
+        result = whisper.transcribe(
+            model=local_whisper_model,
+            audio=loaded_audio,
+            language=language,
+            prompt=transcription_prompt,
+        )
         # Need to use the get_writer() to get the output into srt format
         # https://github.com/openai/whisper/discussions/758
         writer = whisper.utils.get_writer("srt", ".")
-        # "None" set for options following answer here: https://github.com/openai/whisper/discussions/1229#discussioncomment-7091769
-        writer(result, audio, {"max_line_width":None, "max_line_count":None, "highlight_words":False})
+        # "None" set for options following the
+        # answer here: https://github.com/openai/whisper/discussions/1229#discussioncomment-7091769
+        writer(
+            result,
+            audio,
+            {"max_line_width": None, "max_line_count": None, "highlight_words": False},
+        )
         # The writer() saves the file as audio.srt, and so the following
         # lines are used to read the file into a string.
         with open("audio.srt", "r") as f:
