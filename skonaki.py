@@ -89,14 +89,6 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.run_whisper_locally:
-        try:
-            global whisper
-            import whisper
-        except ImportError:
-            print("Error: Failed to import whisper. Please install the correct dependencies from requirements-local-whisper.txt")
-            sys.exit(1)
-
 
     if Path(args.media).is_file():
         args.media = Path(args.media)
@@ -177,6 +169,12 @@ def generate_summary(
     print(f"Audio file size in MB: {audio_size / 1000000}")
 
     if use_local_whisper:
+        try:
+            import whisper
+        except ImportError:
+            error_message = "Error: Failed to import whisper. Please install the correct dependencies from requirements-local-whisper.txt"
+            return(1, error_message)
+
         print("Transcribing using Whisper locally")
         local_whisper_model = whisper.load_model("base")
         loaded_audio = whisper.load_audio(audio)
