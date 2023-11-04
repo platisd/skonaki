@@ -177,7 +177,7 @@ def generate_summary(
     print(f"Audio file size in MB: {audio_size / 1000000}")
 
     if use_local_whisper:
-        print("Transcribing using local whisper")
+        print("Transcribing using Whisper locally")
         local_whisper_model = whisper.load_model("base")
         loaded_audio = whisper.load_audio(audio)
         result = whisper.transcribe(model=local_whisper_model, audio=loaded_audio, language=language, prompt=transcription_prompt) 
