@@ -1,0 +1,2 @@
+-r requirements.txt
+openai-whisper==20230918

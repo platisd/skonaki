@@ -81,6 +81,12 @@ def main():
         help="Output format, choose between: text (default), json",
         default="text",
     )
+    parser.add_argument(
+        "--run-whisper-locally",
+        help="Run the Whisper API locally (default: False)",
+        required=False,
+        action="store_true",
+    )
     args = parser.parse_args()
 
     if Path(args.media).is_file():
@@ -122,6 +128,7 @@ def main():
         frequency=args.frequency,
         output_path=args.output,
         output_format=args.output_format,
+        use_local_whisper=args.run_whisper_locally,
     )
     print(exit_message)
     return exit_code
@@ -137,6 +144,7 @@ def generate_summary(
     frequency: int = 60,
     output_path: Path = None,
     output_format: str = "text",
+    use_local_whisper: bool = False,
 ):
     if not media.is_file():
         exit_message = f"Media file {media} does not exist"
@@ -159,16 +167,50 @@ def generate_summary(
         audio_size = audio.stat().st_size
     print(f"Audio file size in MB: {audio_size / 1000000}")
 
-    openai.api_key = api_key
-    print("Transcribing using OpenAI's Whisper")
-    with open(audio, "rb") as f:
-        transcript = openai.Audio.transcribe(
-            "whisper-1",
-            f,
-            response_format="srt",
+    if use_local_whisper:
+        try:
+            import whisper  # pylint: disable=import-outside-toplevel
+        except ImportError:
+            error_message = (
+                "Error: Failed to import whisper. "
+                + "Please install the correct dependencies from requirements-local-whisper.txt"
+            )
+            return (1, error_message)
+
+        print("Transcribing using Whisper locally")
+        local_whisper_model = whisper.load_model("base")
+        loaded_audio = whisper.load_audio(audio)
+        result = whisper.transcribe(
+            model=local_whisper_model,
+            audio=loaded_audio,
             language=language,
             prompt=transcription_prompt,
         )
+        # Need to use the get_writer() to get the output into srt format
+        # https://github.com/openai/whisper/discussions/758
+        writer = whisper.utils.get_writer("srt", ".")
+        # "None" set for options following the
+        # answer here: https://github.com/openai/whisper/discussions/1229#discussioncomment-7091769
+        writer(
+            result,
+            audio,
+            {"max_line_width": None, "max_line_count": None, "highlight_words": False},
+        )
+        # The writer() saves the file as audio.srt, and so the following
+        # lines are used to read the file into a string.
+        with open("audio.srt", "r") as f:
+            transcript = f.read()
+    else:
+        openai.api_key = api_key
+        print("Transcribing using OpenAI's Whisper")
+        with open(audio, "rb") as f:
+            transcript = openai.Audio.transcribe(
+                "whisper-1",
+                f,
+                response_format="srt",
+                language=language,
+                prompt=transcription_prompt,
+            )
 
     subs = pysrt.from_string(transcript)
     # Break the transcript into chunks based on the frequency

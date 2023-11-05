@@ -32,8 +32,8 @@ You could use it to create notes out of your recordings, meetings, or even podca
 
 ## How does `skonaki` work?
 
-Ultimately, what `skonaki` does is split audio from video, then transcribe it using
-the Whisper OpenAI API and finally use the transcription to create a cheatsheet with the most
+Ultimately, what `skonaki` does is split audio from video, then transcribe it using either
+the Whisper OpenAI API or by running Whisper locally and finally use the transcription to create a cheatsheet with the most
 important information from the video.
 The cheatsheet generation is done by using the ChatCompletion API by OpenAI.
 It's been tested to work on Ubuntu with `ffmpeg` installed.<br>
@@ -45,9 +45,10 @@ something more or download the video yourself and pass the path to `skonaki`.
 
 * Dependencies
   * To use `skonaki` you need to install its dependencies first by `pip install --user -r requirements.txt`.
+  * The Whisper OpenAI API is used by default. To instead use Whisper locally, install the Whisper library (including all other dependencies) by `pip install --user -r requirements-local-whisper.txt`.
 * OpenAI API key
   * You need to get an [OpenAI API key](https://platform.openai.com/account/api-keys).
-  This is a paid service and it's used for the transcription and the cheatsheet generation.
+    This is a paid service and it's used for the transcription and the cheatsheet generation.
   * Set the `OPENAI_API_KEY` environment variable to your API key or pass it as an argument to `skonaki.py`.
 
 Run `skonaki.py --help` to see all available options.
