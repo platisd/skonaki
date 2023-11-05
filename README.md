@@ -4,7 +4,6 @@ Study smarter, not harder: Create cheatsheets out of videos 🪄
 
 ![skonaki logo](skonaki-logo-small.png)
 
-
 ## What is `skonaki`?
 
 `skonaki` is a tool that allows you to create cheatsheets out of videos.<br>
@@ -43,13 +42,13 @@ something more or download the video yourself and pass the path to `skonaki`.
 
 ### Installation
 
-* Dependencies
-  * To use `skonaki` you need to install its dependencies first by `pip install --user -r requirements.txt`.
-  * The Whisper OpenAI API is used by default. To instead use Whisper locally, install the Whisper library (including all other dependencies) by `pip install --user -r requirements.txt -r requirements-local-whisper.txt`.
-* OpenAI API key
-  * You need to get an [OpenAI API key](https://platform.openai.com/account/api-keys).
-  This is a paid service and it's used for the transcription and the cheatsheet generation.
-  * Set the `OPENAI_API_KEY` environment variable to your API key or pass it as an argument to `skonaki.py`.
+- Dependencies
+  - To use `skonaki` you need to install its dependencies first by `pip install --user -r requirements.txt`.
+  - The Whisper OpenAI API is used by default. To instead use Whisper locally, install the Whisper library (including all other dependencies) by `pip install --user -r requirements-local-whisper.txt`.
+- OpenAI API key
+  - You need to get an [OpenAI API key](https://platform.openai.com/account/api-keys).
+    This is a paid service and it's used for the transcription and the cheatsheet generation.
+  - Set the `OPENAI_API_KEY` environment variable to your API key or pass it as an argument to `skonaki.py`.
 
 Run `skonaki.py --help` to see all available options.
 
@@ -63,16 +62,16 @@ I wanted to avoid handling video URLs since that's its own project and didn't wa
 Here's my very "scientific" comparison of `skonaki` with other tools.
 I did not bother with those that required signing up or had a paywall:
 
-* [youtubesummarizer.com](https://youtubesummarizer.com/)
-  * Works pretty well, there are some ads and I like the executive summary part that they also provide. I'd say the quality of the results is similar to `skonaki`.
-* [summarize.tech](https://www.summarize.tech/)
-  * Wasn't very impressed with the results. It summarizes OKish but wouldn't be good enough for studying purposes.
-* [notegpt.io](https://notegpt.io/)
-  * Rather quick, I only tried their web version, while it also comes as a plugin. While the summary was on point, I found it too short to use for studying purposes. Great for summarizing though.
+- [youtubesummarizer.com](https://youtubesummarizer.com/)
+  - Works pretty well, there are some ads and I like the executive summary part that they also provide. I'd say the quality of the results is similar to `skonaki`.
+- [summarize.tech](https://www.summarize.tech/)
+  - Wasn't very impressed with the results. It summarizes OKish but wouldn't be good enough for studying purposes.
+- [notegpt.io](https://notegpt.io/)
+  - Rather quick, I only tried their web version, while it also comes as a plugin. While the summary was on point, I found it too short to use for studying purposes. Great for summarizing though.
 
 | Tool                  | Summaries | Timestamps | Customization | Notes                                                                                      |
 | --------------------- | --------- | ---------- | ------------- | ------------------------------------------------------------------------------------------ |
-| `skonaki`             | 🏆         | ✅          | ✅             | Can customize anything from the prompt used, to how often a "summary" is produced          |
-| youtubesummarizer.com | 🏆         | ❌          | 😒             | There's a sliding scale for how long the summary should be, but doesn't get too "detailed" |
-| summarize.tech        | 😒         | ✅          | ❌             | No customization, their summary is not very suitable for studying                          |
-| notegpt.io            | 😒         | ❌          | ❌             | The summary is pretty good, but not detailed enough for studying                           |
+| `skonaki`             | 🏆        | ✅         | ✅            | Can customize anything from the prompt used, to how often a "summary" is produced          |
+| youtubesummarizer.com | 🏆        | ❌         | 😒            | There's a sliding scale for how long the summary should be, but doesn't get too "detailed" |
+| summarize.tech        | 😒        | ✅         | ❌            | No customization, their summary is not very suitable for studying                          |
+| notegpt.io            | 😒        | ❌         | ❌            | The summary is pretty good, but not detailed enough for studying                           |
