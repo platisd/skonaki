@@ -89,6 +89,7 @@ def main():
     )
     args = parser.parse_args()
 
+    original_media = args.media
     if Path(args.media).is_file():
         args.media = Path(args.media)
     else:
@@ -120,6 +121,7 @@ def main():
 
     exit_code, exit_message = generate_summary(
         media=args.media,
+        original_media=original_media,
         api_key=args.api_key,
         transcription_prompt=args.transcription_prompt,
         summary_prompt=args.summary_prompt,
@@ -136,6 +138,7 @@ def main():
 
 def generate_summary(
     media: Path,
+    original_media: str,
     api_key: str = os.environ.get("OPENAI_API_KEY"),
     transcription_prompt: str = "",
     summary_prompt: str = DEFAULT_SUMMARY_PROMPT,
@@ -285,7 +288,7 @@ def generate_summary(
             },
         )
 
-    formatted_output = format_output(cheatsheet, output_format)
+    formatted_output = format_output(cheatsheet, original_media, output_format)
 
     if output_path:
         output_path.write_text(formatted_output)
@@ -295,11 +298,13 @@ def generate_summary(
     return (0, exit_message)
 
 
-def format_output(cheatsheet: dict, output_format: str):
+def format_output(cheatsheet: dict, original_media: str, output_format: str):
     if output_format == "json":
+        cheatsheet["original_media"] = original_media
         return json.dumps(cheatsheet, indent=4)
-    # Return as <timestamp>\n<summary> for each timestamp and summary
-    return "\n".join(
+    # Return the original media at the top within an HTML comment
+    # and the rest as <timestamp>\n<summary> for each timestamp and summary
+    return f"<!-- {original_media} -->\n" + "\n".join(
         [f"{timestamp}\n{summary}" for timestamp, summary in cheatsheet.items()]
     )
 
