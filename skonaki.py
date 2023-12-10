@@ -191,7 +191,8 @@ def generate_summary(
         )
         # Need to use the get_writer() to get the output into srt format
         # https://github.com/openai/whisper/discussions/758
-        writer = whisper.utils.get_writer("srt", ".")
+        transcription_path = Path(tempfile.gettempdir()) / "audio.srt"
+        writer = whisper.utils.get_writer("srt", transcription_path.parent)
         # "None" set for options following the
         # answer here: https://github.com/openai/whisper/discussions/1229#discussioncomment-7091769
         writer(
@@ -199,9 +200,7 @@ def generate_summary(
             audio,
             {"max_line_width": None, "max_line_count": None, "highlight_words": False},
         )
-        # The writer() saves the file as audio.srt, and so the following
-        # lines are used to read the file into a string.
-        with open("audio.srt", "r") as f:
+        with open(transcription_path, "r") as f:
             transcript = f.read()
     else:
         openai.api_key = api_key
