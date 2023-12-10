@@ -159,6 +159,8 @@ def generate_summary(
         )
         return (1, exit_message)
 
+    openai_client = openai.OpenAI(api_key=api_key)
+
     audio = get_audio(media)
     audio_size = audio.stat().st_size
     if audio_size > TWENTYFIVE_MB:
@@ -203,12 +205,11 @@ def generate_summary(
         with open(transcription_path, "r") as f:
             transcript = f.read()
     else:
-        openai.api_key = api_key
         print("Transcribing using OpenAI's Whisper")
         with open(audio, "rb") as f:
-            transcript = openai.Audio.transcribe(
-                "whisper-1",
-                f,
+            transcript = openai_client.audio.transcriptions.create(
+                model="whisper-1",
+                file=f,
                 response_format="srt",
                 language=language,
                 prompt=transcription_prompt,
@@ -266,10 +267,8 @@ def generate_summary(
             f"Summarizing using OpenAI's {model} model. Part {current_chunk} of {len(chunks)}."
         )
         current_chunk += 1
-        response = openai.ChatCompletion.create(
-            model=model,
-            messages=messages,
-            temperature=0.6,
+        response = openai_client.chat.completions.create(
+            model=model, messages=messages, temperature=0.6
         )
         gpt_response = response.choices[0].message.content
         # Format timestamp in hh:mm:ss format
