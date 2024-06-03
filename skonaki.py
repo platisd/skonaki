@@ -312,7 +312,7 @@ def get_characters(messages: list):
 
 
 def get_max_tokens(model: str):
-    if model == "gpt-4":
+    if model.startswith("gpt-4"):
         return 7000
 
     return 3000
