@@ -161,59 +161,86 @@ def generate_summary(
 
     openai_client = openai.OpenAI(api_key=api_key)
 
-    audio = get_audio(media)
-    audio_size = audio.stat().st_size
+    media_audio = get_audio(media)
+    audio_size = media_audio.stat().st_size
     if audio_size > TWENTYFIVE_MB:
         print(
             f"Audio file is too large: {audio_size / 1000000}MB"
             + ". It must be less than 25MB, attempting to downsample"
         )
-        audio = downsample_audio(audio, TWENTYFIVE_MB)
-        audio_size = audio.stat().st_size
+        media_audio = downsample_audio(media_audio, TWENTYFIVE_MB)
+        audio_size = media_audio.stat().st_size
     print(f"Audio file size in MB: {audio_size / 1000000}")
 
-    if use_local_whisper:
-        try:
-            import whisper  # pylint: disable=import-outside-toplevel
-        except ImportError:
-            error_message = (
-                "Error: Failed to import whisper. "
-                + "Please install the correct dependencies from requirements-local-whisper.txt"
-            )
-            return (1, error_message)
+    audio_chunk_duration = 20 * 60 * 1000  # 20 minutes in milliseconds
+    audio_chunks = get_audio_chunks(media_audio, audio_chunk_duration)
+    print(f"Split audio into {len(audio_chunks)} chunks")
 
-        print("Transcribing using Whisper locally")
-        local_whisper_model = whisper.load_model("base")
-        loaded_audio = whisper.load_audio(audio)
-        result = whisper.transcribe(
-            model=local_whisper_model,
-            audio=loaded_audio,
-            language=language,
-            prompt=transcription_prompt,
-        )
-        # Need to use the get_writer() to get the output into srt format
-        # https://github.com/openai/whisper/discussions/758
-        transcription_path = TEMP_DIR / "audio.srt"
-        writer = whisper.utils.get_writer("srt", transcription_path.parent)
-        # "None" set for options following the
-        # answer here: https://github.com/openai/whisper/discussions/1229#discussioncomment-7091769
-        writer(
-            result,
-            audio,
-            {"max_line_width": None, "max_line_count": None, "highlight_words": False},
-        )
-        with open(transcription_path, "r") as f:
-            transcript = f.read()
-    else:
-        print("Transcribing using OpenAI's Whisper")
-        with open(audio, "rb") as f:
-            transcript = openai_client.audio.transcriptions.create(
-                model="whisper-1",
-                file=f,
-                response_format="srt",
+    transcripts = []
+    # Transcribe each audio chunk but get the current index
+    for i, audio in enumerate(audio_chunks):
+        if use_local_whisper:
+            try:
+                import whisper  # pylint: disable=import-outside-toplevel
+            except ImportError:
+                error_message = (
+                    "Error: Failed to import whisper. "
+                    + "Please install the correct dependencies from requirements-local-whisper.txt"
+                )
+                return (1, error_message)
+
+            print(
+                "Transcribing using Whisper locally ("
+                + str(i + 1)
+                + "/"
+                + str(len(audio_chunks))
+                + ")"
+            )
+            local_whisper_model = whisper.load_model("base")
+            loaded_audio = whisper.load_audio(audio)
+            result = whisper.transcribe(
+                model=local_whisper_model,
+                audio=loaded_audio,
                 language=language,
                 prompt=transcription_prompt,
             )
+            # Need to use the get_writer() to get the output into srt format
+            # https://github.com/openai/whisper/discussions/758
+            transcription_path = TEMP_DIR / audio.with_suffix(".srt").name
+            writer = whisper.utils.get_writer("srt", transcription_path.parent)
+            # "None" set for options following the
+            # answer here: https://github.com/openai/whisper/discussions/1229#discussioncomment-7091769
+            writer(
+                result,
+                audio,
+                {
+                    "max_line_width": None,
+                    "max_line_count": None,
+                    "highlight_words": False,
+                },
+            )
+            with open(transcription_path, "r") as f:
+                chunk_transcript = f.read()
+                transcripts.append(chunk_transcript)
+        else:
+            print(
+                "Transcribing using OpenAI's Whisper API ("
+                + str(i + 1)
+                + "/"
+                + str(len(audio_chunks))
+                + ")"
+            )
+            with open(audio, "rb") as f:
+                chunk_transcript = openai_client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=f,
+                    response_format="srt",
+                    language=language,
+                    prompt=transcription_prompt,
+                )
+                transcripts.append(chunk_transcript)
+
+    transcript = "\n".join(transcripts)
 
     subs = pysrt.from_string(transcript)
     # Break the transcript into chunks based on the frequency
@@ -316,6 +343,17 @@ def get_max_tokens(model: str):
         return 7000
 
     return 3000
+
+
+def get_audio_chunks(audio: Path, chunk_duration: int):
+    audio = AudioSegment.from_file(audio)
+    audio_chunks = []
+    for i in range(0, len(audio), chunk_duration):
+        audio_chunk = audio[i : i + chunk_duration]
+        audio_chunk.export(TEMP_DIR / f"audio_{i}.mp3", format="mp3")
+        audio_chunks.append(TEMP_DIR / f"audio_{i}.mp3")
+        print(f"Saved audio chunk {i} to {TEMP_DIR / f'audio_{i}.mp3'}")
+    return audio_chunks
 
 
 def get_audio(media: Path):
