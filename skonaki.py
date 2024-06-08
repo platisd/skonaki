@@ -184,8 +184,8 @@ def generate_summary(
             # https://github.com/openai/whisper/discussions/758
             transcription_path = TEMP_DIR / audio.with_suffix(".srt").name
             writer = whisper.utils.get_writer("srt", transcription_path.parent)
-            # "None" set for options following the
-            # answer here: https://github.com/openai/whisper/discussions/1229#discussioncomment-7091769
+            # "None" set for options following:
+            # https://github.com/openai/whisper/discussions/1229#discussioncomment-7091769
             writer(
                 result,
                 audio,
@@ -300,6 +300,7 @@ def generate_summary(
 
 
 def format_output(cheatsheet: dict, original_media: str, output_format: str):
+    """Format the cheatsheet based on the output format"""
     if output_format == "json":
         cheatsheet["original_media"] = original_media
         return json.dumps(cheatsheet, indent=4)
@@ -311,10 +312,12 @@ def format_output(cheatsheet: dict, original_media: str, output_format: str):
 
 
 def get_characters(messages: list):
+    """Get the total number of characters in the messages list"""
     return sum(len(message["content"]) for message in messages)
 
 
 def get_max_tokens(model: str):
+    """Get the maximum number of tokens for the model"""
     if model.startswith("gpt-4"):
         return 7000
 
@@ -322,6 +325,7 @@ def get_max_tokens(model: str):
 
 
 def get_media_from_url(media_url: str):
+    """Download media from URL and return the path to the downloaded file"""
     audio_codec = "m4a"
     audio_fname = Path("skonaki_audio_from_youtube." + audio_codec)
     extracted_audio = TEMP_DIR / audio_fname
@@ -350,6 +354,7 @@ def get_media_from_url(media_url: str):
 
 
 def get_audio_chunks(audio: Path, chunk_duration: int):
+    """Split audio into chunks of the specified duration and save them to a temporary directory"""
     audio = AudioSegment.from_file(audio)
     audio_chunks = []
     for i in range(0, len(audio), chunk_duration):
@@ -361,6 +366,7 @@ def get_audio_chunks(audio: Path, chunk_duration: int):
 
 
 def get_audio(media: Path):
+    """Get audio from media file and convert to mp3 if necessary"""
     print(f"Getting audio from {media}")
     file_type = mimetypes.guess_type(media)[0]
     if file_type == "audio":
@@ -376,6 +382,7 @@ def get_audio(media: Path):
 
 
 def downsample_audio(audio: Path, max_size: int = TWENTYFIVE_MB):
+    """Downsample audio to reduce the file size if it's too large"""
     print(f"Downsampling audio from {audio}")
     bitrates = ["64k", "32k", "16k"]
     for bitrate in bitrates:
