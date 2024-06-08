@@ -93,31 +93,7 @@ def main():
     if Path(args.media).is_file():
         args.media = Path(args.media)
     else:
-        audio_codec = "m4a"
-        audio_fname = Path("skonaki_audio_from_youtube." + audio_codec)
-        extracted_audio = TEMP_DIR / audio_fname
-        ydl_opts = {
-            "outtmpl": str(extracted_audio.with_suffix("")),
-            "overwrites": True,
-            "format": "m4a/bestaudio/best",
-            "postprocessors": [
-                {  # Extract audio using ffmpeg
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": audio_codec,
-                }
-            ],
-        }
-        with YoutubeDL(ydl_opts) as ydl:
-            ydl_code = ydl.download([args.media])
-            if ydl_code != 0:
-                print(
-                    "Unable to download media file from: "
-                    + args.media
-                    + " error: "
-                    + str(ydl_code)
-                )
-            print("Downloaded from: " + args.media + " to: " + str(extracted_audio))
-            args.media = extracted_audio
+        args.media = get_media_from_url(args.media)
 
     exit_code, exit_message = generate_summary(
         media=args.media,
@@ -343,6 +319,34 @@ def get_max_tokens(model: str):
         return 7000
 
     return 3000
+
+
+def get_media_from_url(media_url: str):
+    audio_codec = "m4a"
+    audio_fname = Path("skonaki_audio_from_youtube." + audio_codec)
+    extracted_audio = TEMP_DIR / audio_fname
+    ydl_opts = {
+        "outtmpl": str(extracted_audio.with_suffix("")),
+        "overwrites": True,
+        "format": "m4a/bestaudio/best",
+        "postprocessors": [
+            {  # Extract audio using ffmpeg
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": audio_codec,
+            }
+        ],
+    }
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl_code = ydl.download([media_url])
+        if ydl_code != 0:
+            print(
+                "Unable to download media file from: "
+                + media_url
+                + " error: "
+                + str(ydl_code)
+            )
+        print("Downloaded from: " + media_url + " to: " + str(extracted_audio))
+        return extracted_audio
 
 
 def get_audio_chunks(audio: Path, chunk_duration: int):
