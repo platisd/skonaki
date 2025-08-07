@@ -60,8 +60,8 @@ def main():
     )
     parser.add_argument(
         "--model",
-        help="OpenAI model to use (default: gpt-4o-mini)",
-        default="gpt-4o-mini",
+        help="OpenAI model to use (default: gpt-5-mini)",
+        default="gpt-5-mini",
     )
     parser.add_argument(
         "--language",
@@ -118,7 +118,7 @@ def generate_summary(
     api_key: str = os.environ.get("OPENAI_API_KEY"),
     transcription_prompt: str = "",
     summary_prompt: str = DEFAULT_SUMMARY_PROMPT,
-    model: str = "gpt-4o-mini",
+    model: str = "gpt-5-mini",
     language: str = "en",
     frequency: int = 60,
     output_path: Path = None,
